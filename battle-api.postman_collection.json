@@ -1,0 +1,101 @@
+{
+  "info": {
+    "_postman_id": "6aab16ed-40ab-4e98-8b1d-be09e352761c",
+    "name": "battle-api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "post battle",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8090/battles?trainer=Ash&opponent=Misty",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8090",
+          "path": [
+            "battles"
+          ],
+          "query": [
+            {
+              "key": "trainer",
+              "value": "Ash"
+            },
+            {
+              "key": "opponent",
+              "value": "Misty"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get battle",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8090/battles/6851b846-9e19-4f6f-84d3-52eca904bb9c",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8090",
+          "path": [
+            "battles",
+            "6851b846-9e19-4f6f-84d3-52eca904bb9c"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "attack",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8090/battles/6851b846-9e19-4f6f-84d3-52eca904bb9c/Ash/attack",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8090",
+          "path": [
+            "battles",
+            "6851b846-9e19-4f6f-84d3-52eca904bb9c",
+            "Ash",
+            "attack"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get battles",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8090/battles/",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8090",
+          "path": [
+            "battles",
+            ""
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "protocolProfileBehavior": {}
+}
