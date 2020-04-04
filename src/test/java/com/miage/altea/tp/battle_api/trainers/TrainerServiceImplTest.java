@@ -21,7 +21,7 @@ public class TrainerServiceImplTest {
         var trainer = new Trainer();
         trainer.setName("Ash");
 
-        var expectedUrl = "http://localhost:8080/trainers/" + trainer.getName();
+        var expectedUrl = "http://localhost:8085/trainers/" + trainer.getName();
         when(restTemplate.getForObject(expectedUrl, Trainer.class)).thenReturn(trainer);
 
         var resultTrainer = trainerServiceImpl.getTrainerByName(trainer.getName());

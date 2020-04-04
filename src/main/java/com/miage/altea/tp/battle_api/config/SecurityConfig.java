@@ -19,53 +19,40 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
-@Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    @Configuration
+    public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private TrainerService trainerService;
+        @Autowired
+        private TrainerService trainerService;
 
-    public TrainerService getTrainerService() {
-        return trainerService;
+        public TrainerService getTrainerService() {
+            return trainerService;
+        }
+
+        @Autowired
+        public void setTrainerService(TrainerService trainerService) {
+            this.trainerService = trainerService;
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
+        }
+
+        @Bean
+        public UserDetailsService userDetailsService() {
+            return userName -> Optional.ofNullable(trainerService.getTrainerByName(userName))
+                    .map((trainer) ->
+                            User.withUsername(trainer.getName())
+                                    .password(trainer.getPassword())
+                                    .roles("USER")
+                                    .build()
+                    ).orElseThrow(() -> new BadCredentialsException("No such user"));
+        }
+
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            super.configure(http);
+            http.csrf().disable();
+        }
     }
-
-    @Autowired
-    public void setTrainerService(TrainerService trainerService) {
-        this.trainerService = trainerService;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return userName -> Optional.ofNullable(trainerService.getTrainerByName(userName))
-                .map((trainer) ->
-                        User.withUsername(trainer.getName())
-                                .password(trainer.getPassword())
-                                .roles("USER")
-                                .build()
-                ).orElseThrow(() -> new BadCredentialsException("No such user"));
-    }
-
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST"));
-        configuration.setAllowCredentials(true);
-        configuration.addAllowedHeader("Authorization");
-        configuration.addAllowedHeader("Content-type");
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        super.configure(http);
-        http.csrf().disable();
-    }
-}
