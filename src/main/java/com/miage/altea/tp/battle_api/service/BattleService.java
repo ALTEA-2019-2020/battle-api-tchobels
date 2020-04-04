@@ -2,7 +2,6 @@ package com.miage.altea.tp.battle_api.service;
 
 import com.miage.altea.tp.battle_api.bo.Battle;
 import com.miage.altea.tp.battle_api.bo.Pokemon;
-import com.miage.altea.tp.battle_api.bo.PokemonType;
 import com.miage.altea.tp.battle_api.bo.Trainer;
 import com.miage.altea.tp.battle_api.exception.ExceptionNotFound;
 import com.miage.altea.tp.battle_api.pokemonTypes.PokemonTypeService;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -31,35 +29,33 @@ public class BattleService {
         return battlesList;
     }
 
-    public UUID getUuid(String trainer, String opponent) throws ExceptionNotFound {
+    public Battle createNewBattle(String trainer, String opponent) throws ExceptionNotFound {
         Trainer trainerA = trainerService.getTrainerByName(trainer);
         Trainer trainerB = trainerService.getTrainerByName(opponent);
 
-        List<PokemonType> pokemonsTrainerA = trainerA.getTeam().stream()
-                .map((Pokemon p) -> pokemonTypeService.getPokemonType(p.getPokemonTypeId()))
-                .collect(Collectors.toList());
+        trainerA.getTeam().forEach(pokemon -> {
+            pokemon.setType(pokemonTypeService.getPokemonType(pokemon.getPokemonTypeId()));
+            pokemon.getType().getStats().setStatsBylevel(pokemon.getLevel());
+        });
 
-        List<PokemonType> pokemonsTrainerB = trainerB.getTeam().stream()
-                .map((Pokemon p) -> pokemonTypeService.getPokemonType(p.getPokemonTypeId()))
-                .collect(Collectors.toList());
+        trainerB.getTeam().forEach(pokemon -> {
+            pokemon.setType(pokemonTypeService.getPokemonType(pokemon.getPokemonTypeId()));
+            pokemon.getType().getStats().setStatsBylevel(pokemon.getLevel());
+        });
 
-        trainerA.setPokemonTypes(pokemonsTrainerA);
-        trainerB.setPokemonTypes(pokemonsTrainerB);
+        Battle battle = new Battle(UUID.randomUUID(), trainerA, trainerB);
 
-        Battle battle = new Battle(UUID.randomUUID(),trainerA,trainerB);
+        Pokemon pokemonChooseTrainerA = this.getPokemon(trainerA.getTeam());
+        Pokemon pokemonChooseTrainerB = this.getPokemon(trainerB.getTeam());
 
-        PokemonType pokemonChooseTrainerA = this.getPokemon(trainerA.getPokemonTypes());
-        PokemonType pokemonChooseTrainerB = this.getPokemon(trainerB.getPokemonTypes());
-
-        if (pokemonChooseTrainerA.getStats().getSpeed() < pokemonChooseTrainerB.getStats().getSpeed()) {
+        if (pokemonChooseTrainerA.getType().getStats().getSpeed() < pokemonChooseTrainerB.getType().getStats().getSpeed()) {
             battle.setTrainer(trainerB);
             battle.setOpponent(trainerA);
         }
         battle.getTrainer().setNextTurn(true);
         battle.getOpponent().setNextTurn(false);
         this.battlesList.put(battle.getUuid(), battle);
-        return battle.getUuid();
-
+        return battle;
     }
 
 
@@ -73,28 +69,27 @@ public class BattleService {
         Trainer trainerA = battle.getTrainer().getName().equals(trainerName) ? battle.getTrainer() : battle.getOpponent();
         Trainer trainerB = battle.getTrainer().getName().equals(trainerName) ? battle.getOpponent() : battle.getTrainer();
 
-        PokemonType pokemonChooseTrainerA = this.getPokemon(trainerA.getPokemonTypes());
-        PokemonType pokemonChooseTrainerB = this.getPokemon(trainerB.getPokemonTypes());
+        Pokemon pokemonChooseTrainerA = this.getPokemon(trainerA.getTeam());
+        Pokemon pokemonChooseTrainerB = this.getPokemon(trainerB.getTeam());
 
         if (!trainerA.isNextTurn()) {
             throw new ExceptionNotFound();
         }
 
         int score = 2 + ((2 * pokemonChooseTrainerA.getLevel() / 5 +
-                (2 * (pokemonChooseTrainerA.getStats().getAttack() / pokemonChooseTrainerB.getStats().getDefense()))));
-        int defenseHp = pokemonChooseTrainerB.getStats().getHp();
+                (2 * (pokemonChooseTrainerA.getType().getStats().getAttack() / pokemonChooseTrainerB.getType().getStats().getDefense()))));
+        int defenseHp = pokemonChooseTrainerB.getType().getStats().getHp();
         int total = defenseHp - score;
-        pokemonChooseTrainerB.getStats().setHp(Math.max(total, 0));
+        pokemonChooseTrainerB.getType().getStats().setHp(total < 0 ? 0 : total);
         pokemonChooseTrainerB.setAlive(total > 0);
         trainerA.setNextTurn(false);
         trainerB.setNextTurn(true);
         return battle;
-
     }
 
 
-    private PokemonType getPokemon(List<PokemonType> pokemons) {
-        return pokemons.stream().filter(PokemonType::isAlive).findFirst().get();
+    private Pokemon getPokemon(List<Pokemon> pokemons) {
+        return pokemons.stream().filter(Pokemon::isAlive).findFirst().get();
     }
 
 

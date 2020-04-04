@@ -14,7 +14,6 @@ import java.util.List;
 public class Trainer {
     private String name;
     private List<Pokemon> team;
-    private List<PokemonType> pokemonTypes;
     private boolean nextTurn;
     private String password;
 

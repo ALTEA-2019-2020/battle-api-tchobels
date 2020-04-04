@@ -19,8 +19,8 @@ public class BattleController {
     BattleService battleService;
 
     @PostMapping
-    public UUID setNewBattle(@RequestParam String trainer, @RequestParam String opponent) throws ExceptionNotFound {
-        return battleService.getUuid(trainer, opponent);
+    public Battle setNewBattle(@RequestParam String trainer, @RequestParam String opponent) throws ExceptionNotFound {
+        return battleService.createNewBattle(trainer, opponent);
     }
 
     @GetMapping

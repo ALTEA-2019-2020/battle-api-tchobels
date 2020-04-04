@@ -10,12 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Pokemon {
-    private PokemonType type;
     private int level;
     private int pokemonTypeId;
-    private Integer hp;
-    private Integer maxHp;
-
-    private boolean ko = false;
+    private PokemonType type;
     private boolean alive = true;
 }

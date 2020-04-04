@@ -21,9 +21,4 @@ public class PokemonType {
     private Stats stats;
     private int weight;
     private List<String> types;
-    private Integer hp;
-    private Integer maxHp;
-
-    private boolean ko = false;
-    private boolean alive = true;
 }
